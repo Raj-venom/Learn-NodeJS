@@ -7,13 +7,6 @@ import {
 } from "../controllers/task.controllers.js"
 
 import { verifyPermission } from "../middlewares/permission.middleware.js"
-import {
-    readTask,
-    writeTask,
-    editTask,
-    deleteTask
-
-} from "../middlewares/access.middleware.js"
 
 
 const router = Router()
