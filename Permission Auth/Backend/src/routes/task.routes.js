@@ -20,10 +20,10 @@ const router = Router()
 
 router.use(verifyPermission)
 
-router.route("/readFile").get(readTask, readFile)
-router.route("/addfile").post(writeTask, writeFile)
-router.route("/modifyfile").patch(editTask, modifyFile)
-router.route("/deletefile").delete(deleteTask, deleteFile)
+router.route("/readFile").get(readFile)
+router.route("/addfile").post(writeFile)
+router.route("/modifyfile").patch(modifyFile)
+router.route("/deletefile").delete(deleteFile)
 
 
 export default router
