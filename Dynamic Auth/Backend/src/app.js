@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors"
 import { ApiError } from "./utils/ApiError.js"
 import cookieParser from "cookie-parser"
+import { getAllRoutes } from "./controllers/permission.controllers.js"
 
 
 const app = express()
@@ -28,7 +29,7 @@ app.use("/api/v1/permission", permissionRouter)
 app.use("/api/v1/task", taskRouter)
 
 
-
+app.get("/api/v1/allroutes", getAllRoutes(app))
 
 
 app.use((err, req, res, next) => {

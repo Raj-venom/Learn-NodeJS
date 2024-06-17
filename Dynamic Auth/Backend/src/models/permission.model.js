@@ -12,12 +12,11 @@ const permissionSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    method: {
+    path: {
         type: String,
-        required: true,
-        enum: ["GET", "POST", "PATCH", "DELETE", "PUT"], 
         trim: true
     }
 });
 
 export const Permission = mongoose.model("Permission", permissionSchema);
+

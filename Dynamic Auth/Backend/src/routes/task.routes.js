@@ -11,12 +11,10 @@ import { verifyPermission } from "../middlewares/permission.middleware.js"
 
 const router = Router()
 
-router.use(verifyPermission)
-
-router.route("/readFile").get(readFile)
-router.route("/addfile").post(writeFile)
-router.route("/modifyfile").patch(modifyFile)
-router.route("/deletefile").delete(deleteFile)
+router.route("/readFile").get(verifyPermission("/readFile"), readFile)
+router.route("/addfile").post(verifyPermission("/addfile"), writeFile)
+router.route("/modifyfile").patch(verifyPermission("/modifyfile"), modifyFile)
+router.route("/deletefile").delete(verifyPermission("/deletefile"), deleteFile)
 
 
 export default router

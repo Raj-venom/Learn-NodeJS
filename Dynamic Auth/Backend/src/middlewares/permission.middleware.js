@@ -8,7 +8,7 @@ import { Permission } from "../models/permission.model.js";
 
 
 
-export const verifyPermission = asyncHandler(async (req, res, next) => {
+export const verifyPermission = (path) => asyncHandler(async (req, res, next) => {
 
     try {
 
@@ -30,10 +30,10 @@ export const verifyPermission = asyncHandler(async (req, res, next) => {
         const parsedPermissions = permissionSchema.parse({ permissions: user.permission })
 
 
-        const requiredPermission = await Permission.findOne({ method: req.method })
+        const requiredPermission = await Permission.findOne({ path })
 
         if (!requiredPermission) {
-            throw new ApiError(403, "Permission not defined for this method")
+            throw new ApiError(403, "Permission not defined ")
         }
 
         if (parsedPermissions.permissions.includes(requiredPermission.name)) {

@@ -60,12 +60,12 @@ const removePermission = asyncHandler(async (req, res) => {
 
 const createPermission = asyncHandler(async (req, res) => {
 
-    const { name, description, method } = req.body;
+    const { name, description, path } = req.body;
 
     if (
-        [name, description, method].some((field) => field?.trim() === "" || field?.trim() == undefined)
+        [name, description, path].some((field) => field?.trim() === "" || field?.trim() == undefined)
     ) {
-        throw new ApiError(400, "Name, description, and method are required")
+        throw new ApiError(400, "Name, description, and path are required")
     }
 
     const existingPermission = await Permission.findOne({ name })
@@ -77,7 +77,7 @@ const createPermission = asyncHandler(async (req, res) => {
     const permission = await Permission.create({
         name,
         description,
-        method
+        path
     })
 
     if (!permission) {
@@ -91,8 +91,33 @@ const createPermission = asyncHandler(async (req, res) => {
 
 })
 
+
+const getAllRoutes = (app) => asyncHandler(async (req, res) => {
+    const routes = [];
+    app._router.stack.forEach((middleware) => {
+        if (middleware.route) {
+            // Routes registered directly on the app
+            const route = middleware.route;
+            const methods = Object.keys(route.methods).map(method => method.toUpperCase());
+            routes.push({ path: route.path, methods });
+        } else if (middleware.name === 'router') {
+            // Router middleware
+            middleware.handle.stack.forEach((handler) => {
+                if (handler.route) {
+                    const route = handler.route;
+                    const methods = Object.keys(route.methods).map(method => method.toUpperCase());
+                    routes.push({ path: route.path, methods });
+                }
+            });
+        }
+    });
+    return res.status(200).json(new ApiResponse(200, routes, "All routes fetched successfully "));
+});
+
+
 export {
     addPermission,
     removePermission,
-    createPermission
+    createPermission,
+    getAllRoutes
 }
