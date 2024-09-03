@@ -135,10 +135,47 @@ const getAllPost = async (req, res) => {
 
     try {
 
-        const posts = await prisma.post.findMany()
+        const posts = await prisma.post.findMany({
+            select: {
+                id: true,
+                title: true,
+                content: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                },
+                comments: {
+                    select: {
+                        id: true,
+                        comment: true,
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                            }
+                        }
+                    }
+                },
+                comment_count: true
+            },
+
+            // filter
+            orderBy: { createdAt: 'asc' },
+            where: {
+                userId: { 
+                   gt:1
+                }
+                // title:{
+                //     endsWith: "good"
+                // }
+            }
+
+        })
 
         if (posts.length > 0) {
-            return res.status(200).json({ data: posts })
+            return res.status(200).json({ data: posts, message: "All posts fetched sucessfully" })
         }
 
         return res.status(404).json({ message: "No posts found" })
@@ -175,6 +212,33 @@ const getPostByUser = async (req, res) => {
 
 }
 
+const searchPost = async (req, res) => {
+
+    const {title} = req.query
+    try {
+
+        const posts = await prisma.post.findMany({
+            where:{
+                title:{
+                    search: title,
+                    // mode: 'insensitive'
+                }
+            }
+        })
+
+        if (posts.length > 0) {
+            return res.status(200).json({ data: posts })
+        }
+
+        return res.status(404).json({ message: `No posts found with title ${title}` })
+        
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: "Internal server error" })
+    }
+}
+
+
 
 export {
     createPost,
@@ -182,5 +246,7 @@ export {
     updatePost,
     deletePost,
     getAllPost,
-    getPostByUser
+    getPostByUser,
+    searchPost
+
 }

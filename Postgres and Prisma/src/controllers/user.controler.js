@@ -135,26 +135,32 @@ const getAllUsers = async (req, res) => {
                 id: true,
                 name: true,
                 email: true,
-                post: {
-                    select: {
-                        id: true,
-                        title: true,
-                        content: true
-                    }
-                },
-                comment: {
-                    select: {
-                        id: true,
-                        comment: true
-                    }
-                },
+                // post: {
+                //     select: {
+                //         id: true,
+                //         title: true,
+                //         content: true
+                //     }
+                // },
+                // comment: {
+                //     select: {
+                //         id: true,
+                //         comment: true
+                //     }
+                // },
                 _count: {
                     select: {
                         post: true,
                         comment: true
                     }
                 }
-            }
+            },
+            // where:{
+            //     email:{
+            //         endsWith:"@gmail.com"
+            //     }
+            // }
+
 
         })
 
@@ -172,11 +178,63 @@ const getAllUsers = async (req, res) => {
 
 }
 
+const filterUser = async (req, res) => {
+
+    const { email, name } = req.query
+
+    try {
+        const users = await prisma.user.findMany({
+
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                _count: {
+                    select: {
+                        post: true,
+                        comment: true
+                    }
+                }
+            },
+            where: {
+                OR: [
+                    {
+                        email: {
+                           endsWith: email,
+                        },
+                    },
+                    {
+                        name: {
+                            contains: name,
+                        },
+                    },
+                ]
+            }
+
+
+        })
+
+        if (!users) {
+            return res.status(404).json({ message: "No users found" })
+        }
+
+        return res.status(200).json({ data: users, message: "Users retrieved successfully" })
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: "Internal server error" })
+
+    }
+
+}
+
+
 export {
     registereUser,
     getUser,
     updateUser,
     deleteUser,
-    getAllUsers
+    getAllUsers,
+    filterUser
 
 }
