@@ -133,9 +133,23 @@ const deletePost = async (req, res) => {
 
 const getAllPost = async (req, res) => {
 
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+
+    if (page < 1) {
+        page
+    }
+    if (limit < 1 || limit > 100) {
+        limit = 10
+    }
+
+    const offset = (page - 1) * limit
+
     try {
 
         const posts = await prisma.post.findMany({
+            skip: offset,
+            take: limit,
             select: {
                 id: true,
                 title: true,
@@ -164,8 +178,8 @@ const getAllPost = async (req, res) => {
             // filter
             orderBy: { createdAt: 'asc' },
             where: {
-                userId: { 
-                   gt:1
+                userId: {
+                    gt: 1
                 }
                 // title:{
                 //     endsWith: "good"
@@ -174,11 +188,10 @@ const getAllPost = async (req, res) => {
 
         })
 
-        if (posts.length > 0) {
-            return res.status(200).json({ data: posts, message: "All posts fetched sucessfully" })
-        }
+        const totlaPosts = await prisma.post.count()
+        const totalPages = Math.ceil(totlaPosts / limit)
 
-        return res.status(404).json({ message: "No posts found" })
+        return res.status(200).json({ data: posts, totalPages, currentPage: page })
 
 
     } catch (error) {
@@ -214,12 +227,12 @@ const getPostByUser = async (req, res) => {
 
 const searchPost = async (req, res) => {
 
-    const {title} = req.query
+    const { title } = req.query
     try {
 
         const posts = await prisma.post.findMany({
-            where:{
-                title:{
+            where: {
+                title: {
                     search: title,
                     // mode: 'insensitive'
                 }
@@ -231,7 +244,7 @@ const searchPost = async (req, res) => {
         }
 
         return res.status(404).json({ message: `No posts found with title ${title}` })
-        
+
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: "Internal server error" })
